@@ -7,29 +7,29 @@ const path = require('path');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        if (file.fieldname === 'file') { // Verifica si el archivo es una foto o un PDF
-            cb(null, './fotos/imagen'); // Si es una foto, guárdala en la carpeta de fotos
-        } else {
-            cb(null, './fotos/pdf'); // Si es un PDF, guárdalo en la carpeta de PDFs
-        }
+      cb(null, './fotos/imagen'); 
     },
     filename: (req, file, cb) => {
-        const fileName = `${file.originalname}`;
-        cb(null, fileName);
+      const fileName = `${file.originalname}`;
+      cb(null, fileName);
     },
-});
+  });
+  
+  
+  const upload = multer({ storage });
 
-const upload = multer({ storage });
+  router.use('/verfoto', express.static(path.join(__dirname, '../fotos/imagen')));
 
-router.use('/verfoto', express.static(path.join(__dirname, '../fotos/imagen')));
-router.use('/verpdf', express.static(path.join(__dirname, '../fotos/pdf')));
-
-router.post("/create", upload.fields([{ name: 'file', maxCount: 1 }, { name: 'pdf', maxCount: 1 }]), async (req, res) => {
+router.post("/create",upload.single('file'), async (req, res) => {
+    req.body.nombre_activo = req.body.nombre_activo.toUpperCase();
+    req.body.observacion = req.body.observacion.toUpperCase();
     console.log(req.body);
     const data = new userModel(req.body);
     await data.save();
     res.send({ success: true, message: "dato registrado" });
+
 });
+
 
 
 router.get("/", async (req, res) => {
@@ -44,8 +44,19 @@ router.get("/", async (req, res) => {
     console.log(data);
 });
 
-router.put("/update", async (req, res) => {   
+// Actualizar
+
+router.put("/update",upload.single('file'),async (req, res) => {   
+
+   if (req.body.nombre_activo) {
+    req.body.nombre_activo = req.body.nombre_activo.toUpperCase();
+}
+if (req.body.observacion ) {
+    req.body.observacion  = req.body.observacion .toUpperCase();
+}
+    console.log(req.body);
     const { _id, ...rest } = req.body;
+    console.log(rest);
     const data = await userModel.updateOne({ _id: _id }, rest);
     res.send({ success: true, message: "actualizado", data: data });
 });

@@ -32,8 +32,11 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({ storage, fileFilter });
 router.use('/verfoto', express.static(path.join(__dirname, '../fotos/imagen')));
 router.use('/verpdf', express.static(path.join(__dirname, '../archivos/pdf')));
+
 router.post("/create", upload.fields([{ name: 'foto_evento', maxCount: 1 }, { name: 'archivo_evento', maxCount: 1 }]), async (req, res) => {
     try {
+        req.body.titulo_evento = req.body.titulo_evento.toUpperCase();
+        req.body.descripcion_evento = req.body.descripcion_evento.toUpperCase();
         const data = new userModel(req.body);
         await data.save();
         res.send({ success: true, message: "dato registrado" });
@@ -62,6 +65,12 @@ router.get("/", async (req, res) => {
 // Actualizar
 router.put("/update", upload.fields([{ name: 'foto_evento', maxCount: 1 }, { name: 'archivo_evento', maxCount: 1 }]), async (req, res) => {
     try {
+        if (req.body.titulo_evento) {
+            req.body.titulo_evento = req.body.titulo_evento.toUpperCase();
+        }
+        if (req.body.descripcion_evento) {
+            req.body.descripcion_evento = req.body.descripcion_evento.toUpperCase();
+        }
         const { _id, ...rest } = req.body;
         const data = await userModel.updateOne({ _id: _id }, rest);
         res.send({ success: true, message: "actualizado", data: data });

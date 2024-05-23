@@ -13,14 +13,14 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/create", async (req, res) => {
-
+    req.body.nombre_materia = req.body.nombre_materia.toUpperCase();
     const data = new userModel(req.body);
     await data.save();
     res.send({ success: true, message: "dato registrado" });
 });
 
 router.put("/update", async (req, res) => {   
-   
+    req.body.nombre_materia = req.body.nombre_materia.toUpperCase();
     const { _id, ...rest } = req.body;
     const data = await userModel.updateOne({ _id: _id }, rest);
     res.send({ success: true, message: "actualizado", data: data });
